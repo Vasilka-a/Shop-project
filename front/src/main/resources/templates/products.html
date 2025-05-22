@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Каталог товаров</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            margin: 2em;
+            background-color: #f9f9f9;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-item: center;
+            padding-bottom: 1em;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2em;
+        }
+
+        .cart-section {
+            flex: 1;
+        }
+
+        .logo-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        .auth-buttons {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1em;
+        }
+
+        .header .btn {
+            padding: 0.5em 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .login-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .admin-section {
+            background-color: #e9ecef;
+            padding: 1em;
+            border-radius: 5px;
+            margin-bottom: 1.5em;
+        }
+
+        .admin-section h2 {
+            margin-bottom: 0.5em;
+        }
+
+        .admin-section textarea {
+            width: 100%;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .admin-section button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 0.5em 1em;
+            border: none;
+            cursor: pointer;
+        }
+
+        .admin-section button:hover {
+            background-color: #0056b3;
+        }
+
+
+        .cart-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        h1 {
+            margin-bottom: 1em;
+            text-align: center;
+        }
+
+        .add-btn {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 2em;
+            padding: 0.5em 1.5em;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .requestProduct-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5em;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 1em;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .price {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .description {
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .meta {
+            font-size: 0.8em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div class="cart-section">
+        <div th:if="${authenticated and !isAdmin}">
+            <a class="btn cart-btn" href="/cart">Корзина</a>
+        </div>
+    </div>
+
+    <div class="logo-section">
+        <h1>Магазин украшений</h1>
+    </div>
+
+    <div class="auth-buttons">
+        <div th:if="${authenticated}">
+            <a class="btn logout-btn" href="/logout">Выйти</a>
+        </div>
+
+        <div th:if="${!authenticated}">
+            <a class="btn login-btn" href="/login">Войти</a>
+        </div>
+    </div>
+</div>
+
+<h1>Каталог товаров</h1>
+
+<div th:if="${isAdmin}">
+    <a class="add-btn" href="/products/create">Добавить товар</a>
+</div>
+
+
+<div class="requestProduct-grid">
+    <div class="card" th:each="requestProduct : ${products}">
+        <img alt="Product image"
+             th:if="${requestProduct.productImage != null}"
+             th:src="@{/static/images/{filename}(filename=${requestProduct.productImage})}"/>
+        <img alt="Placeholder"
+             src="https://via.placeholder.com/300x200?text=No+Image" th:if="${requestProduct.productImage == null}"/>
+
+        <div class="card-body">
+            <div class="card-title" th:text="${requestProduct.productName}">Название товара</div>
+            <div class="price" th:text="${requestProduct.price} + ' ₽'">100.00 ₽</div>
+            <div class="description" th:text="${requestProduct.description}">Описание товара</div>
+            <div class="meta">
+                <span th:text="'Остаток: ' + ${requestProduct.quantity}">Остаток</span>
+            </div>
+
+            <!-- Кнопка "В корзину" -->
+            <div th:if="${!isAdmin}">
+                <form method="post" th:action="@{/cart/add}">
+<!--                    <input name="id" th:value="${requestProduct.id}" type="hidden"/>-->
+                    <input name="productName" th:value="${requestProduct.productName}" type="hidden"/>
+                    <input name="productCode" th:value="${requestProduct.productCode}" type="hidden"/>
+                    <input name="productImage" th:value="${requestProduct.productImage}" type="hidden"/>
+                    <input name="price" th:value="${requestProduct.price}" type="hidden"/>
+                    <button style="background:#28a745;color:white;border:none;padding:0.5em 1em;border-radius:5px;cursor:pointer;margin-top:0.5em;"
+                            type="submit">
+                        В корзину
+                    </button>
+                </form>
+            </div>
+
+            <!-- Кнопки для администратора -->
+            <div th:if="${isAdmin}">
+                <form method="post" style="display:inline;" th:action="@{/products/delete}">
+                    <input name="id" th:value="${requestProduct.id}" type="hidden"/>
+                    <input name="productImage" th:value="${requestProduct.productImage}" type="hidden"/>
+                    <button style="background:#dc3545;color:white;border:none;padding:0.5em 1em;border-radius:5px;cursor:pointer;margin-top:0.5em;"
+                            type="submit">
+                        Удалить
+                    </button>
+                </form>
+                <form method="post" style="display:inline;margin-left:0.5em;" th:action="@{/products/change-price}">
+                    <input name="id" th:value="${requestProduct.id}" type="hidden"/>
+                    <label>
+                        <input name="newPrice" placeholder="Новая цена" required step="0.01" style="width:90px;"
+                               type="number"/>
+                    </label>
+                    <button style="background:#ffc107;color:black;border:none;padding:0.5em 1em;border-radius:5px;cursor:pointer;"
+                            type="submit">
+                        Изм. цену
+                    </button>
+                </form>
+                <form method="post" style="display:inline;margin-left:0.5em;" th:action="@{/products/update-quantity}">
+                    <input name="id" th:value="${requestProduct.id}" type="hidden"/>
+                    <label>
+                        <input name="newQuantity" placeholder="Указать остаток" required step="1" style="width:90px;"
+                               type="number"/>
+                    </label>
+                    <button style="background:#ffc107;color:black;border:none;padding:0.5em 1em;border-radius:5px;cursor:pointer;"
+                            type="submit">
+                        Изм. остаток
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Покупка товаров</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+
+        .container h1 {
+            margin-bottom: 1em;
+        }
+
+        .product-list {
+            text-align: left;
+            margin-bottom: 1em;
+        }
+
+        .total-amount {
+            font-weight: bold;
+            margin-top: 1em;
+        }
+
+        .back-btn {
+            margin-top: 2em;
+            padding: 0.5em 1em;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+        }
+
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Вы купили товары:</h1>
+
+    <div class="items-list">
+        <div th:each="item : ${items}">
+            <p th:text="'Товар: ' + ${item.productName} + ', Количество: ' + ${item.quantity} + ', Сумма: ' + ${item.price} + ' ₽'"></p>
+        </div>
+    </div>
+
+    <div class="total-amount">
+        <span>Итого: </span>
+        <span th:text="${totalAmount} + ' ₽'"></span>
+    </div>
+
+    <a class="back-btn" th:href="@{/products/catalog}">Назад</a>
+</div>
+
+</body>
+</html>
