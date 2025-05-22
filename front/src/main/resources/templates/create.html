@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить товар</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-item: flex-start;
+            padding: 3em;
+        }
+
+        .form-card {
+            background-color: white;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h2 {
+            margin-bottom: 1em;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 1em;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.5em;
+            margin-top: 0.5em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            padding: 0;
+        }
+
+        button {
+            margin-top: 1.5em;
+            width: 100%;
+            padding: 0.75em;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1em;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-card">
+    <h2>Добавить товар</h2>
+
+    <form enctype="multipart/form-data" method="post" th:action="@{/products/save}">
+        <label for="productName">Название</label>
+        <input id="productName" name="productName" required type="text"/>
+
+        <label for="productCode">Код товара</label>
+        <input id="productCode" name="productCode" required type="text"/>
+
+        <label for="description">Описание</label>
+        <textarea id="description" name="description" required rows="3"></textarea>
+
+        <label for="price">Цена (₽)</label>
+        <input id="price" name="price" required step="0.01" type="number"/>
+
+        <label for="quantity">Количество</label>
+        <input id="quantity" name="quantity" required type="number"/>
+
+        <label for="productImage">Изображение</label>
+        <input accept="image/*" id="productImage" name="productImage" type="file"/>
+
+        <button type="submit">Сохранить товар</button>
+    </form>
+
+    <a class="back-link" href="/products/all">← Назад к списку товаров</a>
+</div>
+
+</body>
+</html>
