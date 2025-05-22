@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Корзина</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            margin: 2em;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .back-btn {
+            display: block;
+            margin-bottom: 1em;
+            padding: 0.5em 1em;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            width: fit-content;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2em;
+            background-color: white;
+        }
+
+        th, td {
+            padding: 1em;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            height: 60px;
+            object-fit: cover;
+        }
+
+        .actions button {
+            margin-right: 0.5em;
+            padding: 0.4em 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .buy-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .buy-all {
+            margin-top: 2em;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .buy-all button {
+            padding: 0.6em 1.5em;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<a class="back-btn" href="/products/catalog">Назад к товарам</a>
+<h1>Корзина</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Товар</th>
+        <th>Изображение</th>
+        <th>Цена</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${cartItems}">
+        <td th:text="${item.productName}">Название</td>
+        <td>
+            <img alt="Image"
+                 th:if="${item.productImage != null}" th:src="@{/static/images/{img}(img=${item.productImage})}"/>
+            <img alt="No image"
+                 src="https://via.placeholder.com/60x60?text=No+Image" th:if="${item.productImage == null}"/>
+        </td>
+        <td th:text="${item.price} + ' ₽'">0 ₽</td>
+        <!-- Количество товаров -->
+        <td>
+            <form method="post" style="display: inline;" th:action="@{/cart/update-quantity}">
+                <input name="id" th:value="${item.id}" type="hidden"/>
+                <button name="action" type="submit" value="decrease">-</button>
+                <span th:text="${item.quantity}">1</span>
+                <button name="action" type="submit" value="increase">+</button>
+            </form>
+        </td>
+
+        <td class="actions">
+            <form method="post" style="display:inline;" th:action="@{/cart/buy}">
+                <input name="id" th:value="${item.id}" type="hidden"/>
+                <input name="productCode" th:value="${item.productCode}" type="hidden"/>
+                <input name="quantity" th:value="${item.quantity}" type="hidden"/>
+                <button class="buy-btn" type="submit">Купить</button>
+            </form>
+            <form method="post" style="display:inline;" th:action="@{/cart/delete}">
+                <input name="id" th:value="${item.id}" type="hidden"/>
+                <input name="quantity" th:value="${item.quantity}" type="hidden"/>
+                <button class="delete-btn" type="submit">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div>
+    <p style="color: red;" th:if="${error}" th:text="${error}"></p>
+</div>
+<div class="buy-all">
+    <form method="post" th:action="@{/cart/buy-all}">
+        <button type="submit">Купить всё</button>
+    </form>
+</div>
+
+</body>
+</html>
