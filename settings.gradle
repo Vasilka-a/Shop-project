@@ -1,0 +1,8 @@
+rootProject.name = 'shop'
+include 'auth-service'
+include 'front'
+include 'product-service'
+include 'cart-service'
+include 'api-gateway'
+include 'notification-service'
+
