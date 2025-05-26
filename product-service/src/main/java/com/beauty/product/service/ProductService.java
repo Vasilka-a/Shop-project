@@ -96,5 +96,4 @@ public class ProductService {
     public int checkStoreForQuantity(String code) {
         return productRepository.getProductQuantityByCode(code);
     }
-
 }
