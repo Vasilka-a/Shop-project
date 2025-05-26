@@ -1,0 +1,172 @@
+version: '3.8'
+
+services:
+  auth-db:
+    image: postgres:15
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: authPassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - shop-network
+
+  product-db:
+    image: postgres:15
+    container_name: product-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: product
+      POSTGRES_PASSWORD: productPassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - product-db-data:/var/lib/postgresql/data
+    networks:
+      - shop-network
+
+  cart-db:
+    image: postgres:15
+    container_name: cart-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: cart
+      POSTGRES_PASSWORD: cartPassword
+    ports:
+      - "5434:5432"
+    volumes:
+      - cart-db-data:/var/lib/postgresql/data
+    networks:
+      - shop-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    networks:
+      - shop-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - shop-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+      - notification-service
+    networks:
+      - shop-network
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: auth
+      SPRING_DATASOURCE_PASSWORD: authPassword
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_FLYWAY_ENABLED: true
+    depends_on:
+      - auth-db
+      - kafka
+    networks:
+      - shop-network
+    restart: on-failure
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://product-db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: product
+      SPRING_DATASOURCE_PASSWORD: productPassword
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_FLYWAY_ENABLED: true
+    depends_on:
+      - product-db
+      - kafka
+    networks:
+      - shop-network
+    restart: on-failure
+
+  cart-service:
+    build: ./cart-service
+    container_name: cart-service
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://cart-db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: cart
+      SPRING_DATASOURCE_PASSWORD: cartPassword
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_FLYWAY_ENABLED: true
+    depends_on:
+      - cart-db
+      - kafka
+    networks:
+      - shop-network
+    restart: on-failure
+
+  front-service:
+    build: ./front
+    container_name: front-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      - api-gateway
+      - kafka
+    networks:
+      - shop-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      - kafka
+    networks:
+      - shop-network
+
+networks:
+  shop-network:
+    driver: bridge
+
+volumes:
+  auth-db-data:
+  product-db-data:
+  cart-db-data: 
