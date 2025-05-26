@@ -97,8 +97,8 @@ class ProductServiceTest {
     void updateQuantityAfterBought_WithInvalidQuantity() {
         when(productRepository.getProductByCode("TEST001")).thenReturn(Optional.of(testProduct));
 
-        assertThrows(InvalidQuantityException.class, () -> 
-            productService.updateQuantityAfterBought("TEST001", 15)
+        assertThrows(InvalidQuantityException.class, () ->
+                productService.updateQuantityAfterBought("TEST001", 15)
         );
     }
 
@@ -106,8 +106,8 @@ class ProductServiceTest {
     void updateQuantityAfterBought_WithNonExistentProduct() {
         when(productRepository.getProductByCode("NONEXISTENT")).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> 
-            productService.updateQuantityAfterBought("NONEXISTENT", 5)
+        assertThrows(ProductNotFoundException.class, () ->
+                productService.updateQuantityAfterBought("NONEXISTENT", 5)
         );
     }
 
@@ -125,8 +125,8 @@ class ProductServiceTest {
     void updateProductQuantityByAdmin_WithInvalidId() {
         when(productRepository.updateQuantityProduct(999L, 20)).thenReturn(0);
 
-        assertThrows(ProductNotFoundException.class, () -> 
-            productService.updateProductQuantityByAdmin(999L, 20)
+        assertThrows(ProductNotFoundException.class, () ->
+                productService.updateProductQuantityByAdmin(999L, 20)
         );
     }
 
@@ -144,8 +144,8 @@ class ProductServiceTest {
     void updateProductPrice_WithInvalidId() {
         when(productRepository.updateProductPriceById(999L, new BigDecimal("150.00"))).thenReturn(0);
 
-        assertThrows(ProductNotFoundException.class, () -> 
-            productService.updateProductPrice(999L, new BigDecimal("150.00"))
+        assertThrows(ProductNotFoundException.class, () ->
+                productService.updateProductPrice(999L, new BigDecimal("150.00"))
         );
     }
 
@@ -163,8 +163,8 @@ class ProductServiceTest {
     void deleteProduct_WithInvalidId() {
         when(productRepository.deleteProductById(999L)).thenReturn(0);
 
-        assertThrows(ProductNotFoundException.class, () -> 
-            productService.deleteProduct(999L)
+        assertThrows(ProductNotFoundException.class, () ->
+                productService.deleteProduct(999L)
         );
     }
 } 
