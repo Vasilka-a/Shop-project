@@ -11,4 +11,4 @@ create table users
 (
     id    BIGSERIAL PRIMARY KEY,
     email varchar unique not null
-)
+);
