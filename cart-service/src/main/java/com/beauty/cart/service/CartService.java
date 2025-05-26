@@ -150,7 +150,7 @@ public class CartService {
 
     public int checkStoreForQuantity(String code) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:8082/api/products/check-store?code=" + code;
+        String url = "http://product-service:8082/api/products/check-store?code=" + code;
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<?> entity = new HttpEntity<>(headers);
         ResponseEntity<Integer> response = restTemplate.exchange(url, HttpMethod.GET, entity, Integer.class);
