@@ -20,7 +20,7 @@ public class AuthService {
 
     public String login(String email) {
         User user = userRepo.findByEmail(email).orElseThrow(() ->
-            new BadCredentialsException("Email or password does not match, please try again")
+                new BadCredentialsException("Email or password does not match, please try again")
         );
         return jwtUtils.generateToken(user);
     }

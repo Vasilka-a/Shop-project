@@ -45,7 +45,7 @@ public class JwtUtils {
         return (extractUsername(token).equals(userDetails.getUsername())) && (!isTokenExpired(token));
     }
 
-    private boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {//проверяем токен на действительность по заданному времени
         Jws<Claims> jwsClaims = Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token);
         final Date expiration = jwsClaims.getPayload().getExpiration();
         return expiration.before(new Date());

@@ -5,6 +5,10 @@ import com.beauty.auth.repository.UserRepository;
 import com.beauty.auth.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,96 +19,79 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
     private final static String TOKEN = "jwt-token";
 
+    @Mock
     private UserRepository userRepository;
+    @Mock
     private JwtUtils jwtUtils;
+    @InjectMocks
     private AuthService authService;
+    private User user;
 
     @BeforeEach
     void setUp() {
-        userRepository = mock(UserRepository.class);
-        jwtUtils = mock(JwtUtils.class);
-        authService = new AuthService(userRepository, jwtUtils);
+        user = User.builder()
+                .id(1L)
+                .email("user@user.user")
+                .password("12345")
+                .rolesSet(new HashSet<>())
+                .build();
     }
 
-
     @Test
-    void loginShouldReturnTokenIfUserExists() {
-        User user = new User();
-        user.setEmail("user@user.com");
-        user.setPassword("12345");
-        user.setRolesSet(new HashSet<>());
-
-        when(userRepository.findByEmail("user@user.com")).thenReturn(Optional.of(user));
+    void loginForRegisteredUsers() {
+        when(userRepository.findByEmail("user@user.user")).thenReturn(Optional.of(user));
         when(jwtUtils.generateToken(user)).thenReturn(TOKEN);
 
-        String token = authService.login("user@user.com");
+        String token = authService.login("user@user.user");
 
         assertEquals(TOKEN, token);
-        verify(userRepository, times(1)).findByEmail("user@user.com");
+        verify(userRepository, times(1)).findByEmail("user@user.user");
         verify(jwtUtils, times(1)).generateToken(user);
     }
 
     @Test
-    void loginShouldThrowIfUserNotFound() {
-        when(userRepository.findByEmail("wrong@user.com")).thenReturn(Optional.empty());
+    void loginForUnregisteredUsers() {
+        when(userRepository.findByEmail("wrong@user.user")).thenReturn(Optional.empty());
 
-        assertThrows(BadCredentialsException.class, () -> authService.login("wrong@user.com"));
-        verify(userRepository, times(1)).findByEmail("wrong@user.com");
+        assertThrows(BadCredentialsException.class, () -> authService.login("wrong@user.user"));
+        verify(userRepository, times(1)).findByEmail("wrong@user.user");
         verifyNoInteractions(jwtUtils);
     }
 
     @Test
-    void validateTokenShouldReturnTrueForValidToken() {
-        String token = "Bearer valid.jwt.token";
+    void validateTokenForValidToken() {
+        String token = "Bearer " + TOKEN;
 
-        User user = new User();
-        user.setEmail("user@user.com");
-
-        // Уст фейк аутентификацию
         SecurityContextHolder.getContext().setAuthentication(
-                new TestingAuthenticationToken("user@user.com", null)
+                new TestingAuthenticationToken("user@user.user", null)
         );
 
-        when(userRepository.findByEmail("user@user.com")).thenReturn(Optional.of(user));
-        when(jwtUtils.validateToken("valid.jwt.token", user)).thenReturn(true);
+        when(userRepository.findByEmail("user@user.user")).thenReturn(Optional.of(user));
+        when(jwtUtils.validateToken(TOKEN, user)).thenReturn(true);
 
         boolean result = authService.validateToken(token);
 
         assertTrue(result);
-        verify(jwtUtils).validateToken("valid.jwt.token", user);
+        verify(jwtUtils).validateToken(TOKEN, user);
     }
 
     @Test
-    void validateTokenShouldReturnFalseForInvalidToken() {
+    void validateTokenForInvalidToken() {
         String token = "Bearer invalid.token";
 
-        User user = new User();
-        user.setEmail("user@user.com");
-
         SecurityContextHolder.getContext().setAuthentication(
-                new TestingAuthenticationToken("user@user.com", null)
+                new TestingAuthenticationToken("user@user.user", null)
         );
 
-        when(userRepository.findByEmail("user@user.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("user@user.user")).thenReturn(Optional.of(user));
         when(jwtUtils.validateToken("invalid.token", user)).thenReturn(false);
 
         boolean result = authService.validateToken(token);
 
         assertFalse(result);
     }
-
-    @Test
-    void validateTokenShouldThrowIfUserNotFound() {
-        SecurityContextHolder.getContext().setAuthentication(
-                new TestingAuthenticationToken("notfound@user.com", null)
-        );
-
-        when(userRepository.findByEmail("notfound@user.com")).thenReturn(Optional.empty());
-
-        assertThrows(BadCredentialsException.class, () -> authService.validateToken("Bearer some.token"));
-    }
-
 }

@@ -20,7 +20,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -33,7 +34,7 @@ public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
-    private KafkaLogProducer kafkaLogProducer;
+    private KafkaLogProducer loggerService;
     @MockBean
     private AuthService authService;
     @MockBean
@@ -47,12 +48,9 @@ public class AuthControllerTest {
                 .email("user@user.user")
                 .password("12345")
                 .build();
-
         Authentication mockAuthentication = Mockito.mock(Authentication.class);
-
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mockAuthentication);
-
         when(authService.login("user@user.user")).thenReturn("test-token");
 
         mockMvc.perform(post("/api/auth/login")
@@ -60,6 +58,7 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.AUTHORIZATION, "Bearer test-token"));
+        verify(loggerService).sendLogInfo(eq("Auth-service"), anyString());
     }
 
     @Test
@@ -76,5 +75,6 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
+        verify(loggerService).sendLogError(eq("Auth-service"), anyString());
     }
 }

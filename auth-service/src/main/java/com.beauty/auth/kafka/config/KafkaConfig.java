@@ -30,15 +30,15 @@ public class KafkaConfig {
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         // Настройки надежности
-        config.put(ProducerConfig.ACKS_CONFIG, "all");
-        config.put(ProducerConfig.RETRIES_CONFIG, 3);
-        config.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
+        config.put(ProducerConfig.ACKS_CONFIG, "all");//требуется подтверждение от всех брокеров
+        config.put(ProducerConfig.RETRIES_CONFIG, 3);//количество попыток отправить сообщение, перед тем как отметить его как неудачное
+        config.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);//время ожидания перед повторной попыткой отправить неудавшийся запрос
         // Настройки производительности
-        config.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
-        config.put(ProducerConfig.LINGER_MS_CONFIG, 5);
-        config.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
+        config.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);//максимальный размер пакета данных, отправляемого в одном запросе - 16кб
+        config.put(ProducerConfig.LINGER_MS_CONFIG, 5);//максимальное время ожидания дополнительных сообщений перед отправкой партии 5 мс
+        config.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);// общий объём памяти, доступный продюсеру для буферизации сообщений - 32 мб (по умолчанию)
         // Настройки идемпотентности
-        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);//Идемпотентность позволяет избежать отправки дублированных сообщений даже при сбоях в сети, повторных попытках или сбоях брокера
         return new DefaultKafkaProducerFactory<>(config);
     }
 
@@ -51,11 +51,11 @@ public class KafkaConfig {
     public NewTopic logTopic() {
         return TopicBuilder.name(logTopic)
                 .partitions(3)
-                .replicas(1)
+                .replicas(1)//тема не реплицирована
                 .configs(Map.of(
-                        "retention.ms", "604800000", // 7 дней
+                        "retention.ms", "604800000", // время хранения сообщений в топике (теме) перед их удалением. 7 дней
                         "cleanup.policy", "delete"
-                ))
+                ))//удалять после истечения времени
                 .build();
     }
 }
