@@ -147,6 +147,8 @@ services:
     depends_on:
       - api-gateway
       - kafka
+    volumes:
+      - ./uploads:/app/uploads/images
     networks:
       - shop-network
 
@@ -159,6 +161,8 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       - kafka
+    volumes:
+      - ./logs:/app/logs
     networks:
       - shop-network
 
