@@ -12,9 +12,9 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-        "services.auth-service.url=http://localhost:8081",
-        "services.product-service.url=http://localhost:8082",
-        "services.cart-service.url=http://localhost:8083"
+        "services.auth-service.url=http://auth-service:8081",
+        "services.product-service.url=http://product-service:8082",
+        "services.cart-service.url=http://cart-service:8083"
 })
 class GatewayConfigTest {
     @MockBean

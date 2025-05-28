@@ -27,22 +27,18 @@ public class GatewayConfig {
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
-                // Auth Service Routes
                 .route("auth-service", r -> r
                         .path("/api/auth/**")
                         .filters(f -> f
                                 .stripPrefix(0)
                                 .addRequestHeader("X-Service-Name", "auth-service"))
                         .uri(authServiceUrl))
-
-                // Product Service Routes
                 .route("product-service-public", r -> r
                         .path("/api/products/catalog")
                         .filters(f -> f
                                 .stripPrefix(0)
                                 .addRequestHeader("X-Service-Name", "product-service"))
                         .uri(productServiceUrl))
-
                 .route("product-service-secured", r -> r
                         .path("/api/products/**")
                         .filters(f -> f
@@ -50,8 +46,6 @@ public class GatewayConfig {
                                 .addRequestHeader("X-Service-Name", "product-service")
                                 .filter(authenticationPrefilter))
                         .uri(productServiceUrl))
-
-                // Cart Service Routes
                 .route("cart-service", r -> r
                         .path("/api/cart/**")
                         .filters(f -> f
