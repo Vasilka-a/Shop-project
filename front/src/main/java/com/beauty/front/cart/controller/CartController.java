@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,8 +25,7 @@ public class CartController {
 
     @GetMapping
     public String showCartForm(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("UserName");
+        String email = getUserName(request);
         String token = extractTokenFromSession(request);
 
         model.addAttribute("cartItems", cartService.getAllItems(token, email));
@@ -33,14 +33,17 @@ public class CartController {
     }
 
     @PostMapping("/add")
-    public String addToCart(@ModelAttribute ItemRequest item, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("UserName");
+    public String addToCart(@ModelAttribute ItemRequest item, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        String email = getUserName(request);
         String token = extractTokenFromSession(request);
         if (token == null) {
             return "redirect:/login";
         }
-        cartService.addItemToCart(item, token, email);
+           String message = cartService.addItemToCart(item, token, email);
+        if(message!= null){
+            redirectAttributes.addFlashAttribute("error", message);
+            redirectAttributes.addFlashAttribute("errorProductCode", item.getProductCode());
+        }
         return "redirect:/products/catalog";
     }
 
@@ -71,8 +74,7 @@ public class CartController {
 
     @PostMapping("/update-quantity")
     public String updateQuantity(@RequestParam Long id, @RequestParam String action, HttpServletRequest request, Model model) {
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("UserName");
+        String email = getUserName(request);
         String token = extractTokenFromSession(request);
         if (token == null) {
             return "redirect:/login";
@@ -84,30 +86,26 @@ public class CartController {
             model.addAttribute("error", message);
             return "cart";
         }
-
         return "redirect:/cart";
     }
 
     @PostMapping("/buy-all")
     public String buyAllItems(HttpServletRequest request, Model model) {
-
         String token = extractTokenFromSession(request);
         if (token == null) {
             return "redirect:/login";
         }
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("UserName");
+        String email = getUserName(request);
         List<ItemResponse> result = cartService.buyAllProduct(email, token);
         BigDecimal totalAmount = result.stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);//суммирование элементов в потоке, начиная с 0
 
         model.addAttribute("items", result);
         model.addAttribute("totalAmount", totalAmount);
 
         return "purchase-confirmation";
     }
-
 
     private String extractTokenFromSession(HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -118,4 +116,8 @@ public class CartController {
         return tokenFromSession.substring(7);
     }
 
+    public String getUserName(HttpServletRequest request){
+        HttpSession session = request.getSession();
+        return (String) session.getAttribute("UserName");
+    }
 }

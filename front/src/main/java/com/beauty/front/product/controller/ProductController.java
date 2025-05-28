@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,8 @@ public class ProductController {
     }
 
     @GetMapping("/catalog")
-    public String getCatalog(Model model, HttpServletRequest request) {
+    public String getCatalog(Model model, HttpServletRequest request, @ModelAttribute("error") String error,
+                             @ModelAttribute("errorProductCode") String errorProductCode) {
         String token = extractTokenFromSession(request);
         boolean role = false;
         boolean isAuthenticated = false;
@@ -44,11 +46,16 @@ public class ProductController {
         } else {
             model.addAttribute("products", productService.getAllProducts()); // форма без авторизации
         }
+
         model.addAttribute("authenticated", isAuthenticated);
         model.addAttribute("isAdmin", role);
+
+        if (error != null && !error.isEmpty()) {
+            model.addAttribute("error", error);
+            model.addAttribute("errorProductCode", errorProductCode);
+        }
         return "products";
     }
-
 
     @GetMapping("/create")
     public String createProductForm(Model model) {
@@ -77,23 +84,18 @@ public class ProductController {
         requestProduct.setPrice(new java.math.BigDecimal(price));
         requestProduct.setQuantity(quantity);
 
-        // Обработка и сохранение файла
         if (imageFile != null && !imageFile.isEmpty()) {
             String originalFilename = imageFile.getOriginalFilename();
-            // Уникальное имя (можно без UUID, но лучше избегать дубликатов)
             String uniqueFileName = UUID.randomUUID() + "_" + originalFilename;
 
-            // Путь до папки ресурсов (в runtime нужно использовать путь на файловой системе)
-            Path uploadPath = Paths.get("front/src/main/resources/static/images");
+            Path uploadPath = Paths.get("uploads/images/");
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Сохранение файла
             Path filePath = uploadPath.resolve(uniqueFileName);
             Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Установка имени файла в продукт
             requestProduct.setProductImage(uniqueFileName);
         }
         productService.createProduct(requestProduct, token);
@@ -109,7 +111,7 @@ public class ProductController {
             return "redirect:/login";
         }
         productService.deleteProduct(id, token);
-        Path uploadPath = Paths.get("front/src/main/resources/static/images");
+        Path uploadPath = Paths.get("uploads/images");
         try {
             Files.deleteIfExists(Path.of(uploadPath + "/" + image));
         } catch (IOException e) {

@@ -24,7 +24,7 @@ public class CartService {
         this.gatewayServiceUrl = cartServiceUrl;
     }
 
-    public void addItemToCart(ItemRequest item, String token, String email) {
+    public String addItemToCart(ItemRequest item, String token, String email) {
         String url = gatewayServiceUrl + "/api/cart/add?email=" + email;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -37,8 +37,8 @@ public class CartService {
                 "price", item.getPrice());
 
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+       ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+       return response.getBody();
     }
 
     public List<ItemResponse> getAllItems(String token, String email) {

@@ -68,9 +68,8 @@ public class ProductService {
                 "quantity", requestProduct.getQuantity(),
                 "productImage", requestProduct.getProductImage());
 
-
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+        restTemplate.postForEntity(url, requestEntity, String.class);
     }
 
     public void deleteProduct(Long id, String token) {

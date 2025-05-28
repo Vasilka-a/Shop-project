@@ -161,7 +161,6 @@
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
     <div class="cart-section">
         <div th:if="${authenticated and !isAdmin}">
@@ -195,7 +194,7 @@
     <div class="card" th:each="requestProduct : ${products}">
         <img alt="Product image"
              th:if="${requestProduct.productImage != null}"
-             th:src="@{/static/images/{filename}(filename=${requestProduct.productImage})}"/>
+             th:src="@{/images/{filename}(filename=${requestProduct.productImage})}"/>
         <img alt="Placeholder"
              src="https://via.placeholder.com/300x200?text=No+Image" th:if="${requestProduct.productImage == null}"/>
 
@@ -206,11 +205,9 @@
             <div class="meta">
                 <span th:text="'Остаток: ' + ${requestProduct.quantity}">Остаток</span>
             </div>
-
             <!-- Кнопка "В корзину" -->
             <div th:if="${!isAdmin}">
                 <form method="post" th:action="@{/cart/add}">
-<!--                    <input name="id" th:value="${requestProduct.id}" type="hidden"/>-->
                     <input name="productName" th:value="${requestProduct.productName}" type="hidden"/>
                     <input name="productCode" th:value="${requestProduct.productCode}" type="hidden"/>
                     <input name="productImage" th:value="${requestProduct.productImage}" type="hidden"/>
@@ -220,7 +217,13 @@
                         В корзину
                     </button>
                 </form>
+
             </div>
+            <!-- Показываем ошибку только если код товара совпадает -->
+            <p style="color: red;"
+               th:if="${errorProductCode != null and requestProduct.productCode == errorProductCode}"
+               th:text="${error}">
+            </p>
 
             <!-- Кнопки для администратора -->
             <div th:if="${isAdmin}">

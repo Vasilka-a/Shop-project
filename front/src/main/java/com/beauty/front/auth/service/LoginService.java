@@ -1,11 +1,9 @@
 package com.beauty.front.auth.service;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
@@ -32,7 +30,19 @@ public class LoginService {
         );
 
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
-        return restTemplate.postForEntity(url, request, String.class);
+
+        try {
+            return restTemplate.postForEntity(url, request, String.class);
+        } catch(HttpClientErrorException.Unauthorized ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
+    public void logout() {
+        String url = gatewayServiceUrl + "/api/auth/logout";
+
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(headers);
+        ResponseEntity<?> response = restTemplate.postForEntity(url, request, String.class);
+    }
 }

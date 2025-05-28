@@ -28,14 +28,14 @@ public class LoginController {
     @PostMapping("/login")
     public String login(@RequestParam String email, @RequestParam String password, Model model, HttpServletRequest request) {
         ResponseEntity<String> result = loginService.login(email, password);
-        HttpSession session = request.getSession();
-        // Извлекаем токен из заголовков ответа
-        String authorizationHeader = result.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authorizationHeader != null) {
-            // Добавляем токен в атрибуты запроса
-            session.setAttribute("Authorization", authorizationHeader);
-            session.setAttribute("UserName", email);
-            return "redirect:/products/catalog";
+        if(result.getStatusCode().is2xxSuccessful()) {
+            HttpSession session = request.getSession();
+            String authorizationHeader = result.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            if (authorizationHeader != null) {
+                session.setAttribute("Authorization", authorizationHeader);
+                session.setAttribute("UserName", email);
+                return "redirect:/products/catalog";
+            }
         }
         model.addAttribute("error", "Неверный логин или пароль");
         return "login";
@@ -43,6 +43,7 @@ public class LoginController {
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
+        loginService.logout();
         request.getSession().invalidate();
         return "redirect:/products/catalog";
     }

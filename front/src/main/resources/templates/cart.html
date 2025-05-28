@@ -116,7 +116,7 @@
                 <button name="action" type="submit" value="increase">+</button>
             </form>
         </td>
-
+        <!-- Купить товар и удалить -->
         <td class="actions">
             <form method="post" style="display:inline;" th:action="@{/cart/buy}">
                 <input name="id" th:value="${item.id}" type="hidden"/>
