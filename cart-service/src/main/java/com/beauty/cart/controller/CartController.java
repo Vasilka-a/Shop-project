@@ -26,26 +26,23 @@ public class CartController {
     public ResponseEntity<List<ItemResponse>> getAllItems(@RequestParam String email) {
         List<ItemResponse> products = cartService.getAllItems(email);
 
-        loggerService.sendLogInfo("Cart-Service",
-                String.format("Received goods from the user's email %s cart: %s ", email, products));
+        loggerService.sendLogInfo("Cart-Service", String.format("Received goods from the user's email %s number of products: %d ", email, products.size()));
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PostMapping("/add")
     public ResponseEntity<?> addItemToCart(@RequestBody ItemRequest item, @RequestParam String email) {
-        cartService.addToCart(item, email);
+       String response = cartService.addToCart(item, email);
 
-        loggerService.sendLogInfo("Cart-Service",
-                String.format("Added the item to the user's email %s cart: %s ", email, item));
-        return ResponseEntity.status(HttpStatus.CREATED).body("Success added");
+        loggerService.sendLogInfo("Cart-Service", String.format("Added the item to the user's email %s cart: %s ", email, item.getProductName()));
+        return  new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @DeleteMapping()
     public ResponseEntity<?> deleteItem(@RequestParam Long id, @RequestParam int quantity) {
         cartService.deleteItem(id, quantity);
 
-        loggerService.sendLogInfo("Cart-Service",
-                String.format("Success deleted item by id: %d from the cart", id));
+        loggerService.sendLogInfo("Cart-Service", String.format("Success deleted item by id: %d from the cart", id));
         return ResponseEntity.ok("Success deleted");
     }
 
@@ -53,8 +50,7 @@ public class CartController {
     public ResponseEntity<ItemResponse> buyItem(@RequestParam Long id, @RequestParam int quantity) {
         ItemResponse item = cartService.buyItem(id, quantity);
 
-        loggerService.sendLogInfo("Cart-Service",
-                String.format("Success bought item by id: %d", id));
+        loggerService.sendLogInfo("Cart-Service", String.format("Success bought item by id: %d", id));
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
 
@@ -62,8 +58,7 @@ public class CartController {
     public ResponseEntity<List<ItemResponse>> buyAllItem(@RequestParam String email) {
         List<ItemResponse> items = cartService.buyAllItem(email);
 
-        loggerService.sendLogInfo("Cart-Service",
-                String.format("Success bought all items by email: %s", email));
+        loggerService.sendLogInfo("Cart-Service", String.format("Success bought all items by email: %s", email));
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
@@ -71,9 +66,7 @@ public class CartController {
     public ResponseEntity<?> updateQuantity(@RequestParam Long id, @RequestParam String action) {
         String response = cartService.updateItemQuantity(id, action);
 
-        loggerService.sendLogInfo("Cart-Service",
-                String.format("Success update item by id: %d", id));
+        loggerService.sendLogInfo("Cart-Service", String.format("Success update item by id: %d", id));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 }

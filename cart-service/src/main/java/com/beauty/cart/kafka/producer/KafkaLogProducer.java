@@ -18,7 +18,6 @@ public class KafkaLogProducer {
         this.logTopic = logTopic;
     }
 
-
     public void sendLogInfo(String serviceName, String message) {
         LogMessage logMessage = new LogMessage(
                 serviceName,

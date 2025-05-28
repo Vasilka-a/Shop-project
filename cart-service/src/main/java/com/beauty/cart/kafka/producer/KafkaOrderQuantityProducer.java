@@ -16,10 +16,8 @@ public class KafkaOrderQuantityProducer {
         this.updateCountTopic = updateCountTopic;
     }
 
-
     public void sendMessage(String productCode, int quantity) {
         OrderMessage orderMessage = new OrderMessage(productCode, quantity);
         kafkaTemplate.send(updateCountTopic, orderMessage);
     }
-
 }

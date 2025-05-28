@@ -14,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -48,22 +50,29 @@ public class CartService {
                 .collect(Collectors.toList());
     }
 
-    public void addToCart(ItemRequest item, String email) {
+    public String addToCart(ItemRequest item, String email) {
         User user = checkUser(email);
 
-        Long id = cartRepository.getIdByCode(item.getProductCode());
-        if (id != null) {
-            updateItemQuantity(id, "increase");
-        } else {
-            Item newProduct = Item.builder()
-                    .productName(item.getProductName())
-                    .productCode(item.getProductCode())
-                    .productImage(item.getProductImage())
-                    .price(item.getPrice())
-                    .quantity(1)
-                    .user(user)
-                    .build();
-            cartRepository.save(newProduct);
+        int availableQuantity = checkStoreForQuantity(item.getProductCode());
+
+        if (availableQuantity > 0) {
+            Long id = cartRepository.getIdByCode(item.getProductCode());
+            if (id != null) {
+                updateItemQuantity(id, "increase");
+            } else {
+                Item newProduct = Item.builder()
+                        .productName(item.getProductName())
+                        .productCode(item.getProductCode())
+                        .productImage(item.getProductImage())
+                        .price(item.getPrice())
+                        .quantity(1)
+                        .user(user)
+                        .build();
+                cartRepository.save(newProduct);
+            }
+            return "";
+        }else{
+            return "Товар временно не может быть добавлен в корзину";
         }
     }
 
@@ -76,7 +85,7 @@ public class CartService {
             int deleted = cartRepository.deleteItemById(id);
             if (deleted == 0) {
                 throw new ProductNotFoundException(
-                    String.format("Failed to delete product with id: %d", id));
+                        String.format("Failed to delete product with id: %d", id));
             }
         } else {
             // Иначе уменьшаем количество
@@ -84,7 +93,7 @@ public class CartService {
             int updated = cartRepository.updateItemById(id, newQuantity);
             if (updated == 0) {
                 throw new ProductNotFoundException(
-                    String.format("Failed to update quantity for product with id: %d", id));
+                        String.format("Failed to update quantity for product with id: %d", id));
             }
         }
     }
@@ -153,8 +162,12 @@ public class CartService {
         String url = "http://product-service:8082/api/products/check-store?code=" + code;
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<?> entity = new HttpEntity<>(headers);
-        ResponseEntity<Integer> response = restTemplate.exchange(url, HttpMethod.GET, entity, Integer.class);
-        return response.getBody();
+        try {
+            ResponseEntity<Integer> response = restTemplate.exchange(url, HttpMethod.GET, entity, Integer.class);
+            return response.getBody();
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw new RuntimeException("Ошибка при обращении к product-service: " + ex.getStatusCode());
+        }
     }
 
     public User checkUser(String email) {

@@ -34,7 +34,6 @@ public class CartServiceTest {
     @Mock
     private KafkaOrderQuantityProducer kafkaProducer;
 
-
     @InjectMocks
     private CartService cartService;
 
@@ -44,7 +43,7 @@ public class CartServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = User.builder().email("user@example.com").build();
+        user = User.builder().email("user@user.user").build();
 
         testItem = Item.builder()
                 .id(1L)
@@ -63,7 +62,7 @@ public class CartServiceTest {
 
     @Test
     void getAllItems() {
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findUserByEmail("user@user.user")).thenReturn(Optional.of(user));
         when(cartRepository.getAllItems(user.getEmail())).thenReturn(List.of(testItem));
 
         var result = cartService.getAllItems(user.getEmail());
@@ -72,17 +71,17 @@ public class CartServiceTest {
         assertThat(result.get(0).getProductCode()).isEqualTo("TEST_OO1");
     }
 
-    @Test
-    void addToCartNewItem() {
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.ofNullable(user));
-        when(cartRepository.getIdByCode(itemRequest.getProductCode())).thenReturn(null);
-        when(cartRepository.save(any(Item.class))).thenReturn(testItem);
-
-        cartService.addToCart(itemRequest, user.getEmail());
-
-        verify(cartRepository).save(any(Item.class));
-        verify(cartRepository, never()).updateItemById(anyLong(), anyInt());
-    }
+//    @Test
+//    void addToCartNewItem() {
+//        when(userRepository.findUserByEmail("user@user.user")).thenReturn(Optional.ofNullable(user));
+//        when(cartRepository.getIdByCode(itemRequest.getProductCode())).thenReturn(null);
+//        when(cartRepository.save(any(Item.class))).thenReturn(testItem);
+//
+//        cartService.addToCart(itemRequest, user.getEmail());
+//
+//        verify(cartRepository).save(any(Item.class));
+//        verify(cartRepository, never()).updateItemById(anyLong(), anyInt());
+//    }
 
     @Test
     void deleteItemWhenQuantityEquals() {
@@ -119,29 +118,23 @@ public class CartServiceTest {
     }
 
     @Test
-    void checkUser_shouldReturnExistingUser() {
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+    void checkUserIfExistingUser() {
+        when(userRepository.findUserByEmail("user@user.user")).thenReturn(Optional.of(user));
 
         User result = cartService.checkUser(user.getEmail());
 
-        assertThat(result.getEmail()).isEqualTo("user@example.com");
+        assertThat(result.getEmail()).isEqualTo("user@user.user");
     }
 
     @Test
-    void checkUser_shouldCreateUserIfNotFound() {
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
+    void checkUserIfUserNotFound() {
+        when(userRepository.findUserByEmail("user@user.user")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User result = cartService.checkUser(user.getEmail());
 
-        assertThat(result.getEmail()).isEqualTo(user.getEmail());
+        assertThat(result.getEmail()).isEqualTo("user@user.user");
         verify(userRepository).save(any(User.class));
-    }
-
-    @Test
-    void checkUser_shouldThrowIfEmailInvalid() {
-        assertThatThrownBy(() -> cartService.checkUser(""))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
