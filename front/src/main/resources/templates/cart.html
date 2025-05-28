@@ -102,7 +102,7 @@
         <td th:text="${item.productName}">Название</td>
         <td>
             <img alt="Image"
-                 th:if="${item.productImage != null}" th:src="@{/static/images/{img}(img=${item.productImage})}"/>
+                 th:if="${item.productImage != null}" th:src="@{/images/{img}(img=${item.productImage})}"/>
             <img alt="No image"
                  src="https://via.placeholder.com/60x60?text=No+Image" th:if="${item.productImage == null}"/>
         </td>

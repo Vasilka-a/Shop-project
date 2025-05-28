@@ -27,7 +27,9 @@ public class CartController {
     public String showCartForm(Model model, HttpServletRequest request) {
         String email = getUserName(request);
         String token = extractTokenFromSession(request);
-
+        if (token == null) {
+            return "redirect:/login";
+        }
         model.addAttribute("cartItems", cartService.getAllItems(token, email));
         return "cart";
     }
