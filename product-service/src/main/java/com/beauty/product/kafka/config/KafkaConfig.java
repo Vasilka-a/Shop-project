@@ -38,12 +38,10 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
         configProps.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
-
         // Настройки производительности
         configProps.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
         configProps.put(ProducerConfig.LINGER_MS_CONFIG, 5);
         configProps.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
-
         // Настройки идемпотентности
         configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         return new DefaultKafkaProducerFactory<>(configProps);
@@ -63,16 +61,15 @@ public class KafkaConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
-        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);//игнорируются заголовки, установленные сериализатором, и используются вместо них настроенные типы
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, OrderMessage.class.getName());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); //потребитель начинает чтение с самого раннего доступного сообщения в разделе.
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false); // смещения сообщений фиксируются автоматически с заданным интервалом
         // Настройки для обработки ошибок
-        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 300000);
-        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 10000);
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 300000); //максимальное время (в миллисекундах), в течение которого потребитель может бездействовать, не опрашивая брокера 5 мин(по умолчанию)
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 10000); //максимальное время, в течение которого потребитель в группе потребителей может быть отключен от брокера перед тем, как его считают неактивным
         return new DefaultKafkaConsumerFactory<>(props);
     }
 

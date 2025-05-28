@@ -29,9 +29,6 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
-    @Mock
-    private KafkaLogProducer loggerService;
-
     @InjectMocks
     private ProductService productService;
 
@@ -79,7 +76,6 @@ class ProductServiceTest {
         productService.addProduct(testProductRequest);
 
         verify(productRepository).save(any(Product.class));//метод вызван корректно - verify
-        verify(loggerService).sendLogInfo(eq("Product-Service"), contains("Created product"));
     }
 
     @Test
@@ -90,7 +86,6 @@ class ProductServiceTest {
         productService.updateQuantityAfterBought("TEST001", 5);
 
         verify(productRepository).updateQuantityProduct(eq(1L), eq(5));
-        verify(loggerService).sendLogInfo(eq("Product-Service"), anyString());
     }
 
     @Test
@@ -118,7 +113,6 @@ class ProductServiceTest {
         productService.updateProductQuantityByAdmin(1L, 20);
 
         verify(productRepository).updateQuantityProduct(eq(1L), eq(20));
-        verify(loggerService).sendLogInfo(eq("Product-Service"), anyString());
     }
 
     @Test
@@ -137,7 +131,6 @@ class ProductServiceTest {
         productService.updateProductPrice(1L, new BigDecimal("150.00"));
 
         verify(productRepository).updateProductPriceById(eq(1L), eq(new BigDecimal("150.00")));
-        verify(loggerService).sendLogInfo(eq("Product-Service"), anyString());
     }
 
     @Test
@@ -156,7 +149,6 @@ class ProductServiceTest {
         productService.deleteProduct(1L);
 
         verify(productRepository).deleteProductById(eq(1L));
-        verify(loggerService).sendLogInfo(eq("Product-Service"), anyString());
     }
 
     @Test

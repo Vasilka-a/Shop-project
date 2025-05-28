@@ -19,11 +19,9 @@ import java.util.stream.Collectors;
 @Transactional
 public class ProductService {
     private final ProductRepository productRepository;
-    private final KafkaLogProducer loggerService;
 
-    public ProductService(ProductRepository productRepository, KafkaLogProducer loggerService) {
+    public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.loggerService = loggerService;
     }
 
     public List<ProductResponse> getAllProducts() {
@@ -51,8 +49,6 @@ public class ProductService {
                 .quantity(product.getQuantity())
                 .build();
         productRepository.save(newProduct);
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Created product: %s", product.getProductName()));
     }
 
     public void updateQuantityAfterBought(String code, int quantity) {
@@ -65,32 +61,27 @@ public class ProductService {
         }
         int newQuantity = (product.getQuantity() - quantity);
 
-        int row = productRepository.updateQuantityProduct(product.getId(), newQuantity);
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Updated quantity for product %s: %d. Was updated %d row", code, quantity, row));
+        if(productRepository.updateQuantityProduct(product.getId(), newQuantity) == 0){
+            throw new ProductNotFoundException(String.format("Product not found with id: %d", product.getId()));
+        }
     }
 
     public void updateProductQuantityByAdmin(Long id, int newQuantity) {
         if (productRepository.updateQuantityProduct(id, newQuantity) == 0) {
             throw new ProductNotFoundException(String.format("Product not found with id: %d", id));
         }
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Updated quantity for product %d: %d", id, newQuantity));
     }
 
     public void updateProductPrice(Long id, BigDecimal newPrice) {
         if (productRepository.updateProductPriceById(id, newPrice) == 0) {
             throw new ProductNotFoundException(String.format("Product not found with id: %s", id));
         }
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Updated price for product %d: ", id));
     }
 
     public void deleteProduct(Long id) {
         if (productRepository.deleteProductById(id) == 0) {
             throw new ProductNotFoundException(String.format("Product not found with id: %d", id));
         }
-        loggerService.sendLogInfo("Product-Service", String.format("Deleted product: %d", id));
     }
 
     public int checkStoreForQuantity(String code) {

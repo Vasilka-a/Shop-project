@@ -24,54 +24,50 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
+    public ResponseEntity<List<ProductResponse>> getAllProductsForAuthorizeUsers() {
         List<ProductResponse> products = productService.getAllProducts();
 
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Get list of products: %s ", products));
+        loggerService.sendLogInfo("Product-Service", String.format("Product list successfully received. Size: %d ", products.size()));
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @GetMapping("/catalog")
-    public ResponseEntity<List<ProductResponse>> getAllProductsUnAuthorize() {
+    public ResponseEntity<List<ProductResponse>> getAllProductsForUnAuthorizeUsers() {
         List<ProductResponse> products = productService.getAllProducts();
 
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Get list of products: %s ", products));
+        loggerService.sendLogInfo("Product-Service", String.format("Product list successfully received. Size: %d ", products.size()));
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PostMapping()
-    public ResponseEntity<?> addProduct(@RequestBody ProductRequest product) {
+    public ResponseEntity<?> createProduct(@RequestBody ProductRequest product) {
         productService.addProduct(product);
 
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Success added product: %s ", product.getProductName()));
-        return ResponseEntity.status(HttpStatus.CREATED).body("Success added");
+        loggerService.sendLogInfo("Product-Service", String.format("Success added product: %s ", product.getProductName()));
+        return ResponseEntity.status(HttpStatus.CREATED).body("Success created");
     }
 
     @PutMapping("/quantity")
     public ResponseEntity<?> updateProductQuantityByAdmin(@RequestParam Long id, @RequestParam int newQuantity) {
         productService.updateProductQuantityByAdmin(id, newQuantity);
 
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Admin success update product count by id: %d", id));
+        loggerService.sendLogInfo("Product-Service", String.format("Admin success update product count by id: %d", id));
         return ResponseEntity.ok("Success updated");
     }
 
     @PutMapping("/price")
     public ResponseEntity<?> updateProductPrice(@RequestParam Long id, @RequestParam String newPrice) {
         productService.updateProductPrice(id, new BigDecimal(newPrice));
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Success update product price by id: %d", id));
+
+        loggerService.sendLogInfo("Product-Service", String.format("Success update product price by id: %d", id));
         return ResponseEntity.ok("Price updated");
     }
 
     @DeleteMapping()
     public ResponseEntity<?> deleteProduct(@RequestParam Long id) {
         productService.deleteProduct(id);
-        loggerService.sendLogInfo("Product-Service",
-                String.format("Success deleted product by id: %d", id));
+
+        loggerService.sendLogInfo("Product-Service", String.format("Success deleted product by id: %d", id));
         return ResponseEntity.ok("Success deleted");
     }
 

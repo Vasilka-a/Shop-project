@@ -7,10 +7,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 public class OrderListener {
-
     private final ProductService productService;
 
     public OrderListener(ProductService productService) {
@@ -19,11 +17,7 @@ public class OrderListener {
 
     @KafkaListener(topics = "${kafka.topic.product.update}", groupId = "${spring.kafka.consumer.group-id}")
     public void handleOrderMessage(OrderMessage orderMessage ) {
-        try {
-            productService.updateQuantityAfterBought(orderMessage.getProductCode(), orderMessage.getQuantity());
-        } catch (Exception e) {
-            log.error("Error processing message: {}", orderMessage, e);
-        }
+        productService.updateQuantityAfterBought(orderMessage.getProductCode(), orderMessage.getQuantity());
     }
 
 }
