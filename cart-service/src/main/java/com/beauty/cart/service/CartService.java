@@ -82,19 +82,11 @@ public class CartService {
 
         if (currentQuantity <= quantity) {
             // Если запрошенное количество больше или равно текущему, удаляем товар полностью
-            int deleted = cartRepository.deleteItemById(id);
-            if (deleted == 0) {
-                throw new ProductNotFoundException(
-                        String.format("Failed to delete product with id: %d", id));
-            }
+            deleteItemFromRepositoryById(id);
         } else {
             // Иначе уменьшаем количество
             int newQuantity = currentQuantity - quantity;
-            int updated = cartRepository.updateItemById(id, newQuantity);
-            if (updated == 0) {
-                throw new ProductNotFoundException(
-                        String.format("Failed to update quantity for product with id: %d", id));
-            }
+            updateQuantityById(id, newQuantity);
         }
     }
 
@@ -143,17 +135,14 @@ public class CartService {
 
         int quantity = item.getQuantity();
         if ("increase".equals(action)) {
-            int availableQuantity = checkStoreForQuantity(item.getProductCode());
-            if (availableQuantity < (quantity + 1)) {
+            if (checkStoreForQuantity(item.getProductCode()) < (quantity + 1)) {
                 return "Запрошенное количество товара недоступно";
             }
             item.setQuantity(quantity + 1);
         } else if ("decrease".equals(action) && quantity > 1) {
             item.setQuantity(quantity - 1);
         }
-        if (cartRepository.updateItemById(item.getId(), item.getQuantity()) == 0) {
-            throw new ProductNotFoundException(String.format("The product by id: %d was not update", id));
-        }
+        updateQuantityById(id, quantity);
         return null;
     }
 
@@ -181,5 +170,17 @@ public class CartService {
                             .build();
                     return userRepository.save(newUser);
                 });
+    }
+
+    public void updateQuantityById(Long id, int quantity){
+        if (cartRepository.updateItemById(id, quantity) == 0) {
+            throw new ProductNotFoundException(String.format("The product by id: %d was not update", id));
+        }
+    }
+
+    public void deleteItemFromRepositoryById(Long id){
+        if (cartRepository.deleteItemById(id) == 0) {
+            throw new ProductNotFoundException(String.format("Failed to delete product with id: %d", id));
+        }
     }
 }

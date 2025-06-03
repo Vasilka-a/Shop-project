@@ -71,7 +71,7 @@ public class CartController {
 
         model.addAttribute("items", result);
         model.addAttribute("totalAmount", result.getPrice());
-        return "purchase-confirmation";
+        return "purchase-confirmation";//страница-заглушка для оплаты
     }
 
     @PostMapping("/update-quantity")
@@ -106,7 +106,7 @@ public class CartController {
         model.addAttribute("items", result);
         model.addAttribute("totalAmount", totalAmount);
 
-        return "purchase-confirmation";
+        return "purchase-confirmation";//страница-заглушка для оплаты
     }
 
     private String extractTokenFromSession(HttpServletRequest request) {
