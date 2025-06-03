@@ -5,7 +5,6 @@ import com.beauty.product.dto.response.ProductResponse;
 import com.beauty.product.entity.Product;
 import com.beauty.product.exception.InvalidQuantityException;
 import com.beauty.product.exception.ProductNotFoundException;
-import com.beauty.product.kafka.producer.KafkaLogProducer;
 import com.beauty.product.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,20 +106,20 @@ class ProductServiceTest {
     }
 
     @Test
-    void updateProductQuantityByAdmin_WithValidId() {
+    void updateProductQuantity_WithValidId() {
         when(productRepository.updateQuantityProduct(1L, 20)).thenReturn(1);
 
-        productService.updateProductQuantityByAdmin(1L, 20);
+        productService.updateProductQuantity(1L, 20);
 
         verify(productRepository).updateQuantityProduct(eq(1L), eq(20));
     }
 
     @Test
-    void updateProductQuantityByAdmin_WithInvalidId() {
+    void updateProductQuantity_WithInvalidId() {
         when(productRepository.updateQuantityProduct(999L, 20)).thenReturn(0);
 
         assertThrows(ProductNotFoundException.class, () ->
-                productService.updateProductQuantityByAdmin(999L, 20)
+                productService.updateProductQuantity(999L, 20)
         );
     }
 

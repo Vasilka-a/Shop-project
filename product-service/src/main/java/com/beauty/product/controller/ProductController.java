@@ -49,7 +49,7 @@ public class ProductController {
 
     @PutMapping("/quantity")
     public ResponseEntity<?> updateProductQuantityByAdmin(@RequestParam Long id, @RequestParam int newQuantity) {
-        productService.updateProductQuantityByAdmin(id, newQuantity);
+        productService.updateProductQuantity(id, newQuantity);
 
         loggerService.sendLogInfo("Product-Service", String.format("Admin success update product count by id: %d", id));
         return ResponseEntity.ok("Success updated");

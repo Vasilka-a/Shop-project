@@ -5,7 +5,6 @@ import com.beauty.product.dto.response.ProductResponse;
 import com.beauty.product.entity.Product;
 import com.beauty.product.exception.InvalidQuantityException;
 import com.beauty.product.exception.ProductNotFoundException;
-import com.beauty.product.kafka.producer.KafkaLogProducer;
 import com.beauty.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -52,21 +51,17 @@ public class ProductService {
     }
 
     public void updateQuantityAfterBought(String code, int quantity) {
-        Product product = productRepository.getProductByCode(code)
-                .orElseThrow(() -> new ProductNotFoundException(String.format("Product not found with code: %s", code)));
+        Product product = getProductByCode(code);
 
         if (product.getQuantity() < quantity) {
             throw new InvalidQuantityException(String.format("Insufficient quantity. Available: %d, Requested: %d",
                     product.getQuantity(), quantity));
         }
         int newQuantity = (product.getQuantity() - quantity);
-
-        if(productRepository.updateQuantityProduct(product.getId(), newQuantity) == 0){
-            throw new ProductNotFoundException(String.format("Product not found with id: %d", product.getId()));
-        }
+        updateProductQuantity(product.getId(), newQuantity);
     }
 
-    public void updateProductQuantityByAdmin(Long id, int newQuantity) {
+    public void updateProductQuantity(Long id, int newQuantity) {
         if (productRepository.updateQuantityProduct(id, newQuantity) == 0) {
             throw new ProductNotFoundException(String.format("Product not found with id: %d", id));
         }
@@ -86,5 +81,11 @@ public class ProductService {
 
     public int checkStoreForQuantity(String code) {
         return productRepository.getProductQuantityByCode(code);
+    }
+
+    public Product getProductByCode(String code){
+        return productRepository.getProductByCode(code)
+                .orElseThrow(() -> new ProductNotFoundException(String.format("Product not found with code: %s", code)));
+
     }
 }
