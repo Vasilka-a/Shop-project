@@ -142,7 +142,7 @@ public class CartService {
         } else if ("decrease".equals(action) && quantity > 1) {
             item.setQuantity(quantity - 1);
         }
-        updateQuantityById(id, quantity);
+        updateQuantityById(item.getId(), item.getQuantity());
         return null;
     }
 
