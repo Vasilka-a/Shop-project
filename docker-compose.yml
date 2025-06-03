@@ -148,7 +148,7 @@ services:
       - api-gateway
       - kafka
     volumes:
-      - ./uploads:/app/uploads/images
+      - ./uploads/images:/app/uploads/images
     networks:
       - shop-network
 
