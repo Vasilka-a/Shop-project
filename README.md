@@ -71,6 +71,13 @@ JWT-токены выдаются в **auth-service** после входа и �
 3. Откройте приложение:
 [- http://localhost:8084/products/catalog](http://localhost:8084/products/catalog)
 
+ ### Учетные данные для входа
+
+login: user@user.user, password: 12345
+
+login: admin@admin.admin, password: 00000
+
+
 #### Каталог для неаутентифицированных пользователей:
 
 ![Каталог товаров](/uploads/screenshot/interface.jpg)
